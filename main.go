@@ -1,19 +1,17 @@
-// SPDX-License-Identifier: AGPL-3.0-or-later
 /*
- * Copyright (C) 2024 Damian Peckett <damian@pecke.tt>.
+ * Copyright 2024 Damian Peckett <damian@pecke.tt>.
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Licensed under the Immutos Community Edition License, Version 1.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU Affero General Public License for more details.
+ *    http://immutos.com/licenses/LICENSE-1.0
  *
- * You should have received a copy of the GNU Affero General Public License
- * along with this program. If not, see <https://www.gnu.org/licenses/>.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package main
@@ -40,19 +38,19 @@ import (
 	"github.com/dpeckett/telemetry"
 	"github.com/dpeckett/telemetry/v1alpha1"
 	"github.com/gregjones/httpcache"
-	"github.com/immutos/debco/internal/buildkit"
-	"github.com/immutos/debco/internal/constants"
-	"github.com/immutos/debco/internal/database"
-	"github.com/immutos/debco/internal/recipe"
-	latestrecipe "github.com/immutos/debco/internal/recipe/v1alpha1"
-	"github.com/immutos/debco/internal/resolve"
-	"github.com/immutos/debco/internal/secondstage"
-	"github.com/immutos/debco/internal/source"
-	"github.com/immutos/debco/internal/types"
-	"github.com/immutos/debco/internal/unpack"
-	"github.com/immutos/debco/internal/util"
-	"github.com/immutos/debco/internal/util/diskcache"
-	"github.com/immutos/debco/internal/util/hashreader"
+	"github.com/immutos/immutos/internal/buildkit"
+	"github.com/immutos/immutos/internal/constants"
+	"github.com/immutos/immutos/internal/database"
+	"github.com/immutos/immutos/internal/recipe"
+	latestrecipe "github.com/immutos/immutos/internal/recipe/v1alpha1"
+	"github.com/immutos/immutos/internal/resolve"
+	"github.com/immutos/immutos/internal/secondstage"
+	"github.com/immutos/immutos/internal/source"
+	"github.com/immutos/immutos/internal/types"
+	"github.com/immutos/immutos/internal/unpack"
+	"github.com/immutos/immutos/internal/util"
+	"github.com/immutos/immutos/internal/util/diskcache"
+	"github.com/immutos/immutos/internal/util/hashreader"
 	ocispecs "github.com/opencontainers/image-spec/specs-go/v1"
 	"github.com/urfave/cli/v2"
 	"github.com/vbauerster/mpb/v8"
@@ -61,8 +59,8 @@ import (
 )
 
 func main() {
-	defaultCacheDir, _ := xdg.CacheFile("debco")
-	defaultStateDir, _ := xdg.StateFile("debco")
+	defaultCacheDir, _ := xdg.CacheFile("immutos")
+	defaultStateDir, _ := xdg.StateFile("immutos")
 
 	persistentFlags := []cli.Flag{
 		&cli.GenericFlag{
@@ -124,7 +122,7 @@ func main() {
 	initTelemetry := func(c *cli.Context) error {
 		telemetryReporter = telemetry.NewReporter(c.Context, slog.Default(), telemetry.Configuration{
 			BaseURL: constants.TelemetryURL,
-			Tags:    []string{"debco"},
+			Tags:    []string{"immutos"},
 		})
 
 		// Some basic system information.
@@ -166,8 +164,8 @@ func main() {
 	}
 
 	app := &cli.App{
-		Name:    "debco",
-		Usage:   "A declarative Debian base system builder",
+		Name:    "immutos",
+		Usage:   "Debian images that'll run anywhere",
 		Version: constants.Version,
 		Commands: []*cli.Command{
 			{
@@ -218,7 +216,7 @@ func main() {
 					}
 
 					// A temporary directory used during image building.
-					tempDir, err := os.MkdirTemp("", "debco-*")
+					tempDir, err := os.MkdirTemp("", "immutos-*")
 					if err != nil {
 						return fmt.Errorf("failed to create temporary directory: %w", err)
 					}
@@ -245,12 +243,12 @@ func main() {
 					}
 
 					// Start the BuildKit daemon.
-					b := buildkit.New("debco", certsDir)
+					b := buildkit.New("immutos", certsDir)
 					if err := b.StartDaemon(c.Context); err != nil {
 						return fmt.Errorf("failed to start buildkit daemon: %w", err)
 					}
 
-					// If running in development mode, use the current debco binary as the
+					// If running in development mode, use the current immutos binary as the
 					// second stage binary.
 					var secondStageBinaryPath string
 					if c.Bool("dev") {
@@ -260,11 +258,16 @@ func main() {
 						}
 					}
 
+					var downloadOnly bool
+					if rx.Options != nil {
+						downloadOnly = rx.Options.DownloadOnly
+					}
+
 					buildOpts := buildkit.BuildOptions{
 						OCIArchivePath:        c.String("output"),
 						RecipePath:            c.String("filename"),
 						SecondStageBinaryPath: secondStageBinaryPath,
-						DownloadOnly:          rx.Options.DownloadOnly,
+						DownloadOnly:          downloadOnly,
 						ImageConf:             toOCIImageConfig(rx),
 						Tags:                  c.StringSlice("tag"),
 					}
@@ -295,9 +298,9 @@ func main() {
 
 						var requiredNameVersions []string
 
-						// By default, install the debco binary (for second-stage provisioning).
+						// By default, install the immutos binary (for second-stage provisioning).
 						if !c.Bool("dev") {
-							requiredNameVersions = append(requiredNameVersions, "debco")
+							requiredNameVersions = append(requiredNameVersions, "immutos")
 						}
 
 						// By default, install all priority required packages.

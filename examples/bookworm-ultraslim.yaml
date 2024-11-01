@@ -1,5 +1,5 @@
 # A very minimal Debian Bookworm image.
-apiVersion: debco/v1alpha1
+apiVersion: com.immutos/v1alpha1
 kind: Recipe
 
 # Various options/flags to use when building the image.
@@ -72,5 +72,5 @@ container:
     org.opencontainers.image.title: "Debian Bookworm UltraSlim"
     org.opencontainers.image.description: "A very minimal Debian Bookworm image"
     org.opencontainers.image.authors: "Damian Peckett <damian@pecke.tt>"
-    org.opencontainers.image.source: "https://github.com/immutos/debco"
+    org.opencontainers.image.source: "https://github.com/immutos/immutos"
     org.opencontainers.image.ref.name: "registry.dpeckett.dev/debian:bookworm-ultraslim"

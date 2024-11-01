@@ -1,19 +1,17 @@
-// SPDX-License-Identifier: AGPL-3.0-or-later
 /*
- * Copyright (C) 2024 Damian Peckett <damian@pecke.tt>.
+ * Copyright 2024 Damian Peckett <damian@pecke.tt>.
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Licensed under the Immutos Community Edition License, Version 1.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU Affero General Public License for more details.
+ *    http://immutos.com/licenses/LICENSE-1.0
  *
- * You should have received a copy of the GNU Affero General Public License
- * along with this program. If not, see <https://www.gnu.org/licenses/>.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package unpack
@@ -184,7 +182,7 @@ func Unpack(ctx context.Context, tempDir string, packagePaths []string) (string,
 		return "", nil, fmt.Errorf("failed to write dpkg status file: %w", err)
 	}
 
-	dpkgDatabaseArchiveFile, err := os.Create(filepath.Join(tempDir, "dpkg.tar"))
+	dpkgDatabaseArchiveFile, err := os.Create(filepath.Join(tempDir, "dpkg_database.tar"))
 	if err != nil {
 		return "", nil, fmt.Errorf("failed to create dpkg database archive file: %w", err)
 	}

@@ -17,7 +17,7 @@ jobs:
 
     - uses: earthly/actions-setup@v1
       with:
-        version: v0.8.14
+        version: v0.8.15
 
     - name: Check Out Repo
       uses: actions/checkout@v3
@@ -39,7 +39,7 @@ jobs:
 
     - uses: earthly/actions-setup@v1
       with:
-        version: v0.8.14
+        version: v0.8.15
 
     - name: Check Out Repo
       uses: actions/checkout@v3

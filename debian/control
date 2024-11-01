@@ -1,4 +1,4 @@
-Source: debco
+Source: immutos
 Section: golang
 Priority: optional
 Maintainer: Damian Peckett <damian@pecke.tt>
@@ -37,12 +37,12 @@ Build-Depends: debhelper-compat (= 13),
                golang-gopkg-yaml.v3-dev
 Testsuite: autopkgtest-pkg-go
 Standards-Version: 4.6.2
-Vcs-Browser: https://github.com/immutos/debco
-Vcs-Git: https://github.com/immutos/debco.git
-Homepage: https://github.com/immutos/debco
-XS-Go-Import-Path: github.com/immutos/debco
+Vcs-Browser: https://github.com/immutos/immutos
+Vcs-Git: https://github.com/immutos/immutos.git
+Homepage: https://github.com/immutos/immutos
+XS-Go-Import-Path: github.com/immutos/immutos
 
-Package: debco
+Package: immutos
 Section: utils
 Architecture: any
 Depends: ${misc:Depends},

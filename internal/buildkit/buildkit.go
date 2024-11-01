@@ -1,19 +1,17 @@
-// SPDX-License-Identifier: AGPL-3.0-or-later
 /*
- * Copyright (C) 2024 Damian Peckett <damian@pecke.tt>.
+ * Copyright 2024 Damian Peckett <damian@pecke.tt>.
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Licensed under the Immutos Community Edition License, Version 1.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU Affero General Public License for more details.
+ *    http://immutos.com/licenses/LICENSE-1.0
  *
- * You should have received a copy of the GNU Affero General Public License
- * along with this program. If not, see <https://www.gnu.org/licenses/>.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package buildkit
@@ -36,7 +34,7 @@ import (
 	"github.com/moby/buildkit/client"
 	"github.com/moby/buildkit/client/llb"
 
-	"github.com/immutos/debco/internal/buildkit/exptypes"
+	"github.com/immutos/immutos/internal/buildkit/exptypes"
 	gateway "github.com/moby/buildkit/frontend/gateway/client"
 	"github.com/moby/buildkit/identity"
 	"github.com/moby/buildkit/session"
@@ -63,7 +61,7 @@ func New(name, certsDir string) *BuildKit {
 type BuildOptions struct {
 	// OCIArchivePath is the path to the output OCI image tarball.
 	OCIArchivePath string
-	// RecipePath is the path to the debco recipe file.
+	// RecipePath is the path to the immutos recipe file.
 	RecipePath string
 	// SourceDateEpoch is the source date epoch for the image.
 	SourceDateEpoch time.Time
@@ -128,12 +126,12 @@ func (b *BuildKit) Build(ctx context.Context, opts BuildOptions) error {
 
 			if !opts.DownloadOnly {
 				if opts.SecondStageBinaryPath != "" {
-					// Copy the debco binary into the root filesystem.
-					state = state.File(llb.Copy(llb.Local("second-stage-bin"), filepath.Base(opts.SecondStageBinaryPath), "/usr/bin/debco", &llb.CopyInfo{}))
+					// Copy the immutos binary into the root filesystem.
+					state = state.File(llb.Copy(llb.Local("second-stage-bin"), filepath.Base(opts.SecondStageBinaryPath), "/usr/bin/immutos", &llb.CopyInfo{}))
 				}
 
 				state = state.
-					Run(llb.Shlex("debco second-stage merge-usr")).                   // Merge the /usr directory into the root filesystem.
+					Run(llb.Shlex("immutos second-stage merge-usr")).                 // Merge the /usr directory into the root filesystem.
 					Run(llb.Shlex("/var/lib/dpkg/info/base-passwd.preinst install")). // Create the /etc/group and /etc/passwd files (needed by dpkg).
 					Run(llb.Shlex("dpkg --configure -a")).                            // Configure the packages.
 					// Remove the dpkg log file, alternatives log file, and ldconfig cache file.
@@ -144,16 +142,16 @@ func (b *BuildKit) Build(ctx context.Context, opts BuildOptions) error {
 
 				// Provision image (eg. create users/groups etc).
 				state = state.
-					File(llb.Copy(llb.Local("conf"), filepath.Base(opts.RecipePath), "/etc/debco/config.yaml", &llb.CopyInfo{CreateDestPath: true})).
-					Run(llb.Shlex("debco second-stage provision -f /etc/debco/config.yaml")).
+					File(llb.Copy(llb.Local("conf"), filepath.Base(opts.RecipePath), "/etc/immutos/config.yaml", &llb.CopyInfo{CreateDestPath: true})).
+					Run(llb.Shlex("immutos second-stage provision -f /etc/immutos/config.yaml")).
 					Root().
-					File(llb.Rm("/etc/debco"))
+					File(llb.Rm("/etc/immutos"))
 
-				// Remove the no longer needed debco binary.
+				// Remove the no longer needed immutos binary.
 				if opts.SecondStageBinaryPath != "" {
-					state = state.File(llb.Rm("/usr/bin/debco"))
+					state = state.File(llb.Rm("/usr/bin/immutos"))
 				} else {
-					state = state.Run(llb.Shlex("dpkg -r debco")).
+					state = state.Run(llb.Shlex("dpkg -r immutos")).
 						Root()
 				}
 			}
@@ -210,7 +208,7 @@ func (b *BuildKit) Build(ctx context.Context, opts BuildOptions) error {
 	}
 
 	c, err := client.New(ctx, "buildkitd", client.WithCredentials("buildkitd",
-		filepath.Join(b.certsDir, "ca.pem"), filepath.Join(b.certsDir, "debco.pem"), filepath.Join(b.certsDir, "debco-key.pem")),
+		filepath.Join(b.certsDir, "ca.pem"), filepath.Join(b.certsDir, "immutos.pem"), filepath.Join(b.certsDir, "immutos-key.pem")),
 		client.WithContextDialer(func(_ context.Context, address string) (net.Conn, error) {
 			var d net.Dialer
 			return d.DialContext(ctx, "tcp", buildkitURL.Host)
@@ -221,7 +219,7 @@ func (b *BuildKit) Build(ctx context.Context, opts BuildOptions) error {
 	defer c.Close()
 
 	// Create a new session.
-	sess, err := session.NewSession(ctx, "debco", identity.NewID())
+	sess, err := session.NewSession(ctx, "immutos", identity.NewID())
 	if err != nil {
 		return fmt.Errorf("failed to create session: %w", err)
 	}

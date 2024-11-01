@@ -9,7 +9,7 @@ prev_tag=""
 for tag in $tags; do
   git checkout $tag > /dev/null 2>&1
 
-  new_version="$(echo $tag | tr -d 'v')-1"
+  new_version="$(echo $tag | tr -d 'v')"
 
   export FAKETIME=$(git show -s --format=%aI $tag | sed 's/T/ /; s/.\{6\}$//')
   
@@ -19,7 +19,7 @@ for tag in $tags; do
   else
     mkdir -p debian
     cat <<EOF > debian/changelog
-$package (0.0.0-1) UNRELEASED; urgency=medium
+$package (0.0.0) UNRELEASED; urgency=medium
 
  -- $DEBFULLNAME <$DEBEMAIL>  Thu, 01 Jan 1970 00:00:00 +0000
 EOF

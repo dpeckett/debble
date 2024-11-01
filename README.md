@@ -1,4 +1,4 @@
-# debco
+# immutos
 
 A declarative, BuildKit powered, Debian base system builder. 
 
@@ -19,20 +19,20 @@ Inspired by [apko](https://github.com/chainguard-dev/apko), [multistrap](https:/
 
 Add the [immutos apt repository](https://github.com/immutos/apt?tab=readme-ov-file#usage) to your system.
 
-Then install debco:
+Then install immutos:
 
 *Currently packages are only published for Debian 12 (Bookworm).*
 
 ```shell
 sudo apt update
-sudo apt install -y debco
+sudo apt install -y immutos
 ```
 
 ### GitHub Releases
 
 Download statically linked binaries from the GitHub releases page: 
 
-[Latest Release](https://github.com/immutos/debco/releases/latest)
+[Latest Release](https://github.com/immutos/immutos/releases/latest)
 
 ## Usage
 
@@ -45,7 +45,7 @@ Download statically linked binaries from the GitHub releases page:
 To create a minimal Debian image:
 
 ```shell
-debco build -f examples/bookworm-ultraslim.yaml
+immutos build -f examples/bookworm-ultraslim.yaml
 ```
 
 The resulting OCI archive will be saved to `debian-image.tar`.
@@ -57,28 +57,28 @@ You will need a recent release of the [Skopeo](https://github.com/containers/sko
 have native support for loading OCI images.
 
 ```shell
-skopeo copy oci-archive:debian-image.tar docker-daemon:debco/debian:bookworm-ultraslim
+skopeo copy oci-archive:debian-image.tar docker-daemon:immutos/debian:bookworm-ultraslim
 ```
 
 You can then run the image with:
 
 ```shell
-docker run --rm -it debco/debian:bookworm-ultraslim sh
+docker run --rm -it immutos/debian:bookworm-ultraslim sh
 ```
 
 ### Using a Prebuilt Image
 
-For convenience the debco build pipeline publishes a bookworm-ultraslim image.
+For convenience the immutos build pipeline publishes a bookworm-ultraslim image.
 This image is intended for experimentation purposes only. You should build your
-own base images using the `debco build` command.
+own base images using the `immutos build` command.
 
 ```shell
-docker run --rm -it registry.dpeckett.dev/immutos/debco/debian:bookworm-ultraslim
+docker run --rm -it registry.dpeckett.dev/immutos/immutos/debian:bookworm-ultraslim
 ```
 
 ## Telemetry
 
-By default debco gathers anonymous crash and usage statistics. This anonymized
+By default immutos gathers anonymous crash and usage statistics. This anonymized
 data is processed on our servers within the EU and is not shared with third
 parties. You can opt out of telemetry by setting the `DO_NOT_TRACK=1`
 environment variable.

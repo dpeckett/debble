@@ -1,4 +1,4 @@
-module github.com/immutos/debco
+module github.com/immutos/immutos
 
 go 1.22.0
 

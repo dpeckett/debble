@@ -4,12 +4,12 @@ ENV DO_NOT_TRACK=1
 WORKDIR /workspace
 
 all:
-  COPY (+build/debco --GOARCH=amd64) ./dist/debco-linux-amd64
-  COPY (+build/debco --GOARCH=arm64) ./dist/debco-linux-arm64
-  COPY (+build/debco --GOARCH=riscv64) ./dist/debco-linux-riscv64
-  COPY (+build/debco --GOOS=darwin --GOARCH=amd64) ./dist/debco-darwin-amd64
-  COPY (+build/debco --GOOS=darwin --GOARCH=arm64) ./dist/debco-darwin-arm64
-  COPY (+build/debco --GOOS=windows --GOARCH=amd64) ./dist/debco-windows-amd64.exe
+  COPY (+build/immutos --GOARCH=amd64) ./dist/immutos-linux-amd64
+  COPY (+build/immutos --GOARCH=arm64) ./dist/immutos-linux-arm64
+  COPY (+build/immutos --GOARCH=riscv64) ./dist/immutos-linux-riscv64
+  COPY (+build/immutos --GOOS=darwin --GOARCH=amd64) ./dist/immutos-darwin-amd64
+  COPY (+build/immutos --GOOS=darwin --GOARCH=arm64) ./dist/immutos-darwin-arm64
+  COPY (+build/immutos --GOOS=windows --GOARCH=amd64) ./dist/immutos-windows-amd64.exe
   COPY (+package/*.deb --GOARCH=amd64) ./dist/
   COPY (+package/*.deb --GOARCH=arm64) ./dist/
   COPY (+package/*.deb --GOARCH=riscv64) ./dist/
@@ -24,8 +24,8 @@ build:
   RUN go mod download
   COPY . .
   ARG VERSION=dev
-  RUN CGO_ENABLED=0 go build --ldflags "-s -X 'github.com/immutos/debco/internal/constants.Version=${VERSION}'" -o debco main.go
-  SAVE ARTIFACT ./debco AS LOCAL dist/debco-${GOOS}-${GOARCH}
+  RUN CGO_ENABLED=0 go build --ldflags "-s -X 'github.com/immutos/immutos/internal/constants.Version=${VERSION}'" -o immutos main.go
+  SAVE ARTIFACT ./immutos AS LOCAL dist/immutos-${GOOS}-${GOARCH}
 
 tidy:
   LOCALLY
@@ -42,7 +42,7 @@ lint:
 test:
   FROM +tools
   ARG TARGETARCH
-  COPY +build/debco ./dist/debco-linux-${TARGETARCH}
+  COPY +build/immutos ./dist/immutos-linux-${TARGETARCH}
   COPY . ./
   WITH DOCKER
     RUN go test -coverprofile=coverage.out -v ./...
@@ -94,8 +94,8 @@ package:
     golang-golang-x-sync-dev \
     golang-golang-x-term-dev \
     golang-gopkg-yaml.v3-dev
-  RUN mkdir -p /workspace/debco
-  WORKDIR /workspace/debco
+  RUN mkdir -p /workspace/immutos
+  WORKDIR /workspace/immutos
   COPY . .
   RUN if [ -n "$(git status --porcelain)" ]; then echo "Please commit your changes."; exit 1; fi
   RUN if [ -z "$(git describe --tags --exact-match 2>/dev/null)" ]; then echo "Current commit is not tagged."; exit 1; fi
@@ -105,7 +105,7 @@ package:
   ENV DEBFULLNAME="Damian Peckett"
   RUN /usr/local/bin/generate-changelog.sh
   RUN VERSION=$(git describe --tags --abbrev=0 | tr -d 'v') \
-    && tar -czf ../debco_${VERSION}.orig.tar.gz --exclude-vcs .
+    && tar -czf ../immutos_${VERSION}.orig.tar.gz --exclude-vcs .
   ARG GOARCH
   RUN dpkg-buildpackage -d -us -uc --host-arch=${GOARCH}
   SAVE ARTIFACT /workspace/*.deb AS LOCAL dist/

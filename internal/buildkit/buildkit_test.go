@@ -1,19 +1,17 @@
-// SPDX-License-Identifier: AGPL-3.0-or-later
 /*
- * Copyright (C) 2024 Damian Peckett <damian@pecke.tt>.
+ * Copyright 2024 Damian Peckett <damian@pecke.tt>.
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Licensed under the Immutos Community Edition License, Version 1.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU Affero General Public License for more details.
+ *    http://immutos.com/licenses/LICENSE-1.0
  *
- * You should have received a copy of the GNU Affero General Public License
- * along with this program. If not, see <https://www.gnu.org/licenses/>.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package buildkit_test
@@ -36,10 +34,10 @@ import (
 	"github.com/adrg/xdg"
 	"github.com/containerd/containerd/platforms"
 	"github.com/gregjones/httpcache"
-	"github.com/immutos/debco/internal/buildkit"
-	"github.com/immutos/debco/internal/testutil"
-	"github.com/immutos/debco/internal/unpack"
-	"github.com/immutos/debco/internal/util/diskcache"
+	"github.com/immutos/immutos/internal/buildkit"
+	"github.com/immutos/immutos/internal/testutil"
+	"github.com/immutos/immutos/internal/unpack"
+	"github.com/immutos/immutos/internal/util/diskcache"
 	"github.com/stretchr/testify/require"
 )
 
@@ -54,13 +52,13 @@ func TestBuild(t *testing.T) {
 	tempDir := t.TempDir()
 
 	binaryDir := filepath.Join(tempDir, "bin")
-	require.NoError(t, buildDebcoBinary(ctx, binaryDir))
+	require.NoError(t, buildimmutosBinary(ctx, binaryDir))
 
 	certsDir := filepath.Join(tempDir, "certs")
 	err := os.MkdirAll(certsDir, 0o700)
 	require.NoError(t, err)
 
-	b := buildkit.New("debco-test", certsDir)
+	b := buildkit.New("immutos-test", certsDir)
 
 	// Make sure we're starting with a clean slate.
 	_ = b.StopDaemon(ctx)
@@ -93,8 +91,8 @@ func TestBuild(t *testing.T) {
 
 	err = b.Build(ctx, buildkit.BuildOptions{
 		OCIArchivePath:        ociArchivePath,
-		RecipePath:            "testdata/debco.yaml",
-		SecondStageBinaryPath: filepath.Join(binaryDir, "debco"),
+		RecipePath:            "testdata/immutos.yaml",
+		SecondStageBinaryPath: filepath.Join(binaryDir, "immutos"),
 		SourceDateEpoch:       sourceDateEpoch,
 		PlatformOpts: []buildkit.PlatformBuildOptions{
 			{
@@ -268,7 +266,7 @@ var packages = []struct {
 }
 
 func downloadPackages(packagesDir string) error {
-	cacheDir, err := xdg.CacheFile("debco")
+	cacheDir, err := xdg.CacheFile("immutos")
 	if err != nil {
 		return err
 	}
@@ -277,7 +275,7 @@ func downloadPackages(packagesDir string) error {
 		return err
 	}
 
-	// Reuse the main debco cache for downloading packages.
+	// Reuse the main immutos cache for downloading packages.
 	cache, err := diskcache.NewDiskCache(cacheDir, "http")
 	if err != nil {
 		return err
@@ -337,14 +335,14 @@ func downloadPackages(packagesDir string) error {
 	return nil
 }
 
-func buildDebcoBinary(ctx context.Context, binaryDir string) error {
+func buildimmutosBinary(ctx context.Context, binaryDir string) error {
 	moduleRootDir := testutil.Root()
 
-	cmd := exec.CommandContext(ctx, "go", "build", "-o", filepath.Join(binaryDir, "debco"), moduleRootDir)
+	cmd := exec.CommandContext(ctx, "go", "build", "-o", filepath.Join(binaryDir, "immutos"), moduleRootDir)
 	cmd.Env = append(os.Environ(), "CGO_ENABLED=0")
 
 	if output, err := cmd.CombinedOutput(); err != nil {
-		return fmt.Errorf("failed to build debco binary: %w: %s", err, output)
+		return fmt.Errorf("failed to build immutos binary: %w: %s", err, output)
 	}
 
 	return nil
